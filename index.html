@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Stoic Quote</title>
+  <style>
+    @font-face {
+      font-family: 'Yrsa';
+      src: url('font/Yrsa-VariableFont_wght.ttf') format('truetype');
+      font-weight: 100 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Yrsa';
+      src: url('font/Yrsa-Italic-VariableFont_wght.ttf') format('truetype');
+      font-weight: 100 700;
+      font-style: italic;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      font-family: 'Yrsa', Georgia, serif;
+      background: #f5f3ef;
+      color: #2c2c2c;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 720px;
+      text-align: center;
+    }
+    .quote {
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      line-height: 1.5;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+    .author {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      font-style: italic;
+      color: #666;
+      font-weight: 300;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p class="quote" id="quote"></p>
+    <p class="author" id="author"></p>
+  </div>
+  <script>
+    let quotes = [];
+    function seededRandom(seed) {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    }
+    function getDateSeed() {
+      const now = new Date();
+      return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+    }
+    function displayQuote(index) {
+      const q = quotes[index];
+      document.getElementById('quote').textContent = '"' + q.text + '"';
+      document.getElementById('author').textContent = '— ' + q.author;
+    }
+    function showDailyQuote() {
+      const seed = getDateSeed();
+      const index = Math.floor(seededRandom(seed) * quotes.length);
+      displayQuote(index);
+    }
+    function showRandomQuote() {
+      const index = Math.floor(Math.random() * quotes.length);
+      displayQuote(index);
+    }
+    fetch('quotes.json')
+      .then(r => r.json())
+      .then(data => {
+        quotes = data;
+        showDailyQuote();
+        document.body.addEventListener('click', showRandomQuote);
+      });
+  </script>
+</body>
+</html>
