@@ -1,1 +1,3 @@
-[Daily stoic quote](https://mccormick.cx/apps/stoic-quote). Tap for more.
+[Daily quote from the stoics](https://mccormick.cx/apps/stoic-quote). Tap for more quotes.
+
+![Screenshot from the app](./screenshot.png)
