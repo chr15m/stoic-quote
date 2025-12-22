@@ -102,6 +102,26 @@
       const index = Math.floor(Math.random() * quotes.length);
       displayQuote(index);
     }
+
+    function msUntilNext3am() {
+      const now = new Date();
+      const next = new Date(now);
+      next.setHours(3, 0, 0, 0);
+      if (next <= now) {
+        next.setDate(next.getDate() + 1);
+      }
+      return next - now;
+    }
+
+    function scheduleRefreshAt3am() {
+      const ms = msUntilNext3am();
+      setTimeout(() => {
+        window.location.reload();
+      }, ms);
+    }
+
+    scheduleRefreshAt3am();
+
     fetch('quotes.json')
       .then(r => r.json())
       .then(data => {
