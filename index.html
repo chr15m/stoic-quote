@@ -80,6 +80,7 @@
   </div>
   <script>
     let quotes = [];
+    let currentQuoteIndex = null;
 
     function localDayIndex(now = new Date()) {
       const y = now.getFullYear();
@@ -120,6 +121,7 @@
     }
 
     function displayQuote(index) {
+      currentQuoteIndex = index;
       const q = quotes[index];
       document.getElementById('quote').textContent = '"' + q.text + '"';
       document.getElementById('author').textContent = '— ' + q.author;
@@ -155,6 +157,41 @@
         window.location.reload();
       }, ms);
     }
+
+    function isAfterLocal3am(now = new Date()) {
+      const threeAm = new Date(now);
+      threeAm.setHours(3, 0, 0, 0);
+      return now >= threeAm;
+    }
+
+    function maybeRefreshQuoteWhenViewed() {
+      if (!isAfterLocal3am()) return;
+
+      const n = quotes.length;
+      if (!n) return;
+
+      if (currentQuoteIndex === null) return;
+
+      const dayIndex = localDayIndex();
+      const desiredIndex = quoteIndexForDay(dayIndex, n);
+
+      if (currentQuoteIndex !== desiredIndex) {
+        console.log('Updating stale quote after view:', {
+          currentQuoteIndex,
+          desiredIndex,
+          dayIndex
+        });
+        displayQuote(desiredIndex);
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) maybeRefreshQuoteWhenViewed();
+    });
+
+    window.addEventListener('focus', () => {
+      maybeRefreshQuoteWhenViewed();
+    });
 
     scheduleRefreshAt3am();
 
