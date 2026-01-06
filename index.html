@@ -46,8 +46,6 @@
       background: #2c2c2c;
       color: #f5f3ef;
       cursor: default;
-      user-select: none;
-      -webkit-user-select: none;
     }
     body {
       display: flex;
@@ -195,12 +193,42 @@
 
     scheduleRefreshAt3am();
 
+    function copyQuoteToClipboard() {
+      const quoteText = document.getElementById('quote').textContent;
+      const authorText = document.getElementById('author').textContent;
+      const fullText = `${quoteText}\n${authorText}`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(fullText).catch(err => {
+          console.log('Clipboard API failed, using fallback:', err);
+          fallbackCopy(fullText);
+        });
+      } else {
+        fallbackCopy(fullText);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.log('Fallback copy failed:', err);
+      }
+      document.body.removeChild(textarea);
+    }
+
     fetch('quotes.json')
       .then(r => r.json())
       .then(data => {
         quotes = data;
         showDailyQuote();
-        // document.body.addEventListener('click', showRandomQuote);
+        document.body.addEventListener('click', copyQuoteToClipboard);
       });
 
     const iconSize = 192;
