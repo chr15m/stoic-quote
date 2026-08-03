@@ -79,6 +79,10 @@
   <script>
     let quotes = [];
     let currentQuoteIndex = null;
+    let currentDayIndex = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
 
     function localDayIndex(now = new Date()) {
       const y = now.getFullYear();
@@ -125,13 +129,20 @@
       document.getElementById('author').textContent = '— ' + q.author;
     }
 
-    function showDailyQuote() {
+    function showDayQuote(dayIndex) {
       const n = quotes.length;
       if (!n) return;
 
-      const dayIndex = localDayIndex();
+      const today = localDayIndex();
+      if (dayIndex > today) dayIndex = today;
+
+      currentDayIndex = dayIndex;
       const index = quoteIndexForDay(dayIndex, n);
       displayQuote(index);
+    }
+
+    function showDailyQuote() {
+      showDayQuote(localDayIndex());
     }
 
     function showRandomQuote() {
@@ -191,6 +202,27 @@
       maybeRefreshQuoteWhenViewed();
     });
 
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+      isSwiping = false;
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+      const deltaX = e.changedTouches[0].screenX - touchStartX;
+      const deltaY = e.changedTouches[0].screenY - touchStartY;
+
+      if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+        isSwiping = true;
+        console.log('Swipe detected:', { deltaX, currentDayIndex });
+        if (deltaX > 0) {
+          showDayQuote(currentDayIndex - 1);
+        } else if (deltaX < 0 && currentDayIndex < localDayIndex()) {
+          showDayQuote(currentDayIndex + 1);
+        }
+      }
+    });
+
     scheduleRefreshAt3am();
 
     function copyQuoteToClipboard() {
@@ -228,7 +260,10 @@
       .then(data => {
         quotes = data;
         showDailyQuote();
-        document.body.addEventListener('click', copyQuoteToClipboard);
+        document.body.addEventListener('click', () => {
+          if (isSwiping) return;
+          copyQuoteToClipboard();
+        });
       });
 
     const iconSize = 192;
